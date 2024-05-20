@@ -27,40 +27,42 @@ update_interval = 3.0*60 # 3 minutes, recommended display refresh interval
 # display = utils.init_display(console=True)
 display = utils.init_display()
 gps = utils.init_gps()
+gps.update() # Call update to fill the object
+
+# Initialize data dictionary
+dat = {}
+dat["altitude"] = -1
+dat["latitude"] = -1
+dat["longitude"] = -1
+dat["UTC"] = gps.timestamp_utc
+
 
 # Main loop
 last_print = time.monotonic() - update_interval # So that we don't have to wait for first update
 while True: 
     gps.update()
     current = time.monotonic()
+
     if current - last_print >= update_interval: 
         last_print = current 
-        print_string = "NO FIX\nNO FIX\nNO FIX\nNO FIX" # Default screen text
 
         if gps.has_fix: 
-            print_string = ""
-            # Timestamp so we know when the last update was
-            print_string += "UTC: {}/{}/{} {:02}:{:02}:{:02}\n".format(
-                            gps.timestamp_utc.tm_mon, 
-                            gps.timestamp_utc.tm_mday, 
-                            gps.timestamp_utc.tm_year, 
-                            gps.timestamp_utc.tm_hour, 
-                            gps.timestamp_utc.tm_min, 
-                            gps.timestamp_utc.tm_sec,
-                            )
+            if gps.altitude_m is not None: 
+                dat["altitude"] = gps.altitude_m
 
-            # Elevation above sea level
-            print_string += ("{}ft ASL\n".format(gps.altitude_m//.3048) if gps.altitude_m is not None
-                            else "NO ALTITUDE\n")
+            if (gps.latitude is not None) and (gps.longitude is not None): 
+                dat["latitude"] = gps.latitude
+                dat["longitude"] = gps.longitude
 
-            # Which US County/State
-            print_string += "TODO ADD COUNTY\n"
+            dat["UTC"] = gps.timestamp_utc
 
-            # ???
-            print_string += "TODO Add something!"
+            # Print to display
+            # utils.new_frame(dat)
+        # else:            
+        #     print_string = "NO FIX\nNO FIX\nNO FIX\nNO FIX" # Default screen text
+        #     utils.print_multiline_string(display=display, text=print_string)
+        utils.new_frame(display, dat)
 
-        # Print to display
-        utils.draw_text(display=display, text=print_string)
         break
 
 

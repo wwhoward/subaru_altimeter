@@ -9,6 +9,7 @@ import digitalio
 import busio
 import board
 import adafruit_gps
+import reverse_geocoder
 from adafruit_epd.ssd1680 import Adafruit_SSD1680
 from adafruit_epd.epd import Adafruit_EPD
 from PIL import Image, ImageDraw, ImageFont
@@ -34,8 +35,7 @@ def init_display(*args, **kwargs):
         
     return display
 
-
-def draw_text(*args, **kwargs): 
+def print_multiline_string(*args, **kwargs): 
     # Erases text and draws screen
     display = kwargs.get("display", init_display())
     text = kwargs.get("text", "I finally got\nthis damn screen\nto work!")
@@ -47,10 +47,6 @@ def draw_text(*args, **kwargs):
     WHITE = (0xFF)
     BLACK = (0x00)
     
-    text = kwargs.get("text", 
-                        "I finally got\nthis damn screen\nto work! ")
-                        
-    display = kwargs.get("display", init_display())
     image = Image.new("L", (display.width, display.height))
     draw=ImageDraw.Draw(image)
     fontsize=16
@@ -78,9 +74,65 @@ def init_gps():
 
     return gps
 
+def new_frame(display, dat: dict) -> None: 
+    
+    # Erases text and draws screen
+    if display=="console": 
+        print(text)
+        return
+
+    WHITE = (0xFF)
+    GREY  = (0x88)
+    BLACK = (0x00)
+    
+    image = Image.new("L", (display.width, display.height))
+    draw=ImageDraw.Draw(image)
+
+    # Set background (seems a little expensive to do this every time, 
+    #   but it's going once every three minutes... )
+    draw.rectangle((0,0,display.width-1,display.height-1),fill=WHITE)
+
+    # Draw lines
+
+    # Draw text
+    # Altitude
+    altitude_str = "{}ft ASL".format(dat["altitude"]//.3048)
+    font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 21)
+    (text_width, text_height) = font.getsize(altitude_str)
+    draw.text((0,0), altitude_str, font=font, fill=BLACK)
+    draw.line([(0, text_height+3), (text_width+3, text_height+3)], fill=BLACK, width=1)
+    draw.line([(text_width+3, text_height+3), (text_width+3, 0)], fill=BLACK, width=1)
 
 
+    # What county are we in? 
+    geocode = reverse_geocoder.search((dat["latitude"], dat["longitude"]))[0]
+    if "County" in geocode["admin2"]: 
+        location_str = geocode["admin2"].split(" ")[0]
+    else: 
+        location_str = geocode["admin2"]
+    font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16)    
+    (text_width, text_height) = font.getsize(location_str)
+    draw.text((0, 122-text_height), location_str, font=font, fill=BLACK)
+    draw.line([(0, 122-text_height-3), (250, 122-text_height-3)], fill=BLACK, width=1)    
 
+    # Time
+    time_str = "{:02}:{:02}:{:02}z".format(
+            dat["UTC"].tm_hour, 
+            dat["UTC"].tm_min, 
+            dat["UTC"].tm_sec, 
+            )
+    font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16)
+    (text_width, text_height) = font.getsize(time_str)
+    draw.text((250-text_width, 122-text_height), time_str, font=font, fill=BLACK)
+    
+    # breakpoint()
+    # frog=duck
+    # Refresh screen
+    display.image(image)
+    display.display()
+
+def get_county(lat, lon): 
+    return geolocater
 
 
 

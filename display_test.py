@@ -17,8 +17,10 @@ display = Adafruit_SSD1680(122, 250, spi, cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs
 display.rotation = 3
 display.fill(Adafruit_EPD.WHITE)
 
-display.fill_rect(20, 20, 50, 60, Adafruit_EPD.BLACK)
-display.hline(80, 30, 60, Adafruit_EPD.BLACK)
-display.vline(80, 30, 60, Adafruit_EPD.BLACK)
+# display.fill_rect(20, 20, 50, 60, Adafruit_EPD.BLACK)
+# display.hline(80, 30, 60, Adafruit_EPD.BLACK)
+# display.vline(80, 30, 60, Adafruit_EPD.BLACK)
+
+display.fill_rect(86, 101, 250, 122, Adafruit_EPD.BLACK)
 
 display.display()
