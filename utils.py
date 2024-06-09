@@ -131,8 +131,6 @@ def new_frame(display, dat: dict) -> None:
     display.image(image)
     display.display()
 
-def get_county(lat, lon): 
-    return geolocater
 
 
 

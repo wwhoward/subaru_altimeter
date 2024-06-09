@@ -63,7 +63,7 @@ while True:
         #     utils.print_multiline_string(display=display, text=print_string)
         utils.new_frame(display, dat)
 
-        break
+        # break
 
 
 
