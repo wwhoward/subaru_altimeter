@@ -84,6 +84,7 @@ def new_frame(display, dat: dict) -> None:
     WHITE = (0xFF)
     GREY  = (0x88)
     BLACK = (0x00)
+    FONT_FILE="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
     
     image = Image.new("L", (display.width, display.height))
     draw=ImageDraw.Draw(image)
@@ -95,9 +96,20 @@ def new_frame(display, dat: dict) -> None:
     # Draw lines
 
     # Draw text
+    # Welcome message
+    if dat["nFrames"]<1: 
+        welcome_str = "Welcome" 
+        font = ImageFont.truetype(FONT_FILE, 16)
+        (text_width, text_height) = font.getsize(welcome_str)
+        draw.text((0, 61-int(text_height/2)), welcome_str, font=font, fill=BLACK)
+
+    else: 
+        # Here is where any extra info will go
+        pass
+
     # Altitude
     altitude_str = "{}ft ASL".format(dat["altitude"]//.3048)
-    font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 21)
+    font=ImageFont.truetype(FONT_FILE, 21)
     (text_width, text_height) = font.getsize(altitude_str)
     draw.text((0,0), altitude_str, font=font, fill=BLACK)
     draw.line([(0, text_height+3), (text_width+3, text_height+3)], fill=BLACK, width=1)
@@ -110,18 +122,19 @@ def new_frame(display, dat: dict) -> None:
         location_str = geocode["admin2"].split(" ")[0]
     else: 
         location_str = geocode["admin2"]
-    font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16)    
+    font=ImageFont.truetype(FONT_FILE, 16)    
     (text_width, text_height) = font.getsize(location_str)
     draw.text((0, 122-text_height), location_str, font=font, fill=BLACK)
     draw.line([(0, 122-text_height-3), (250, 122-text_height-3)], fill=BLACK, width=1)    
 
     # Time
+
     time_str = "{:02}:{:02}:{:02}z".format(
             dat["UTC"].tm_hour, 
             dat["UTC"].tm_min, 
             dat["UTC"].tm_sec, 
             )
-    font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16)
+    font=ImageFont.truetype(FONT_FILE, 16)
     (text_width, text_height) = font.getsize(time_str)
     draw.text((250-text_width, 122-text_height), time_str, font=font, fill=BLACK)
     

@@ -25,9 +25,18 @@ update_interval = 3.0*60 # 3 minutes, recommended display refresh interval
 
 # Initialize devices
 # display = utils.init_display(console=True)
-display = utils.init_display()
-gps = utils.init_gps()
-gps.update() # Call update to fill the object
+gpsInit = 0
+displayInit = 0
+while gpsInit == 0 and displayInit == 0: 
+    if not gpsInit: 
+        try: 
+            gps = utils.init_gps()
+            gps.update()
+            gpsInit = 1
+    if not displayInit: 
+        try: 
+            display = utils.init_display()  
+            displayInit = 1
 
 # Initialize data dictionary
 dat = {}
@@ -35,6 +44,7 @@ dat["altitude"] = -1
 dat["latitude"] = -1
 dat["longitude"] = -1
 dat["UTC"] = gps.timestamp_utc
+dat["nFrames"] = 0
 
 
 # Main loop
@@ -62,6 +72,7 @@ while True:
         #     print_string = "NO FIX\nNO FIX\nNO FIX\nNO FIX" # Default screen text
         #     utils.print_multiline_string(display=display, text=print_string)
         utils.new_frame(display, dat)
+        dat["nFrames"] += 1
 
         # break
 
